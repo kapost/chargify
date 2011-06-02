@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 
-require File.dirname(__FILE__) + '/lib/chargify.rb'
+require File.dirname(__FILE__) + '/lib/chargify/version.rb'
 
 Gem::Specification.new do |s|
   s.name = %q{chargify}
