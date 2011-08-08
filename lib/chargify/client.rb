@@ -1,4 +1,27 @@
 module Chargify
+  class << self
+     attr_accessor :subdomain, :api_key, :shared_key, :site#, :format, :timeout, :shared_key
+
+     def configure
+       yield self
+       
+       self.site ||= "https://#{subdomain}.chargify.com"
+       
+     end
+     
+     def client
+       @client ||= Client.new
+     end
+     
+     def method_missing(id, *args, &block)
+       if client.respond_to?(id)
+         client.send(id, *args, &block)
+       else
+         raise Exception.new("unsupported method #{id}")
+       end
+     end
+   end
+ 
   class UnexpectedResponseError < RuntimeError
   end
   
@@ -21,12 +44,12 @@ module Chargify
     attr_reader :api_key, :subdomain
     
     # Your API key can be generated on the settings screen.
-    def initialize(api_key, subdomain)
-      @api_key = api_key
-      @subdomain = subdomain
+    def initialize(api_key=nil, subdomain=nil)
+      api_key ||= Chargify.api_key
+      subdomain ||= Chargify.subdomain
       
-      self.class.base_uri "https://#{@subdomain}.chargify.com"
-      self.class.basic_auth @api_key, 'x'
+      self.class.base_uri "https://#{subdomain}.chargify.com"
+      self.class.basic_auth api_key, 'x'
       
     end
     
@@ -73,10 +96,9 @@ module Chargify
     # * organization (Optional) Company/Organization name
     # * reference (Optional, but encouraged) The unique identifier used within your own application for this customer
     # 
-    def update_customer(info={})
+    def update_customer(customer_id, info={})
       info.stringify_keys!
-      chargify_id = info.delete('id')
-      response = Hashie::Mash.new(put("/customers/#{chargify_id}.json", :body => {:customer => info}))
+      response = Hashie::Mash.new(put("/customers/#{customer_id}.json", :body => {:customer => info}))
       return response.customer unless response.customer.to_a.empty?
       response
     end
@@ -109,6 +131,15 @@ module Chargify
       response     = Hashie::Mash.new(raw_response)
       (response.subscription || response).update(:success? => updated)
     end
+    
+    # Returns all elements outputted by Chargify plus:
+    # response.success? -> true if response code is 200, false otherwise
+    def reset_balance(sub_id)
+      raw_response = put("/subscriptions/#{sub_id}/reset_balance.json", :body => "")
+      updated      = true if raw_response.code == 200
+      response     = Hashie::Mash.new(raw_response) rescue Hashie::Mash.new
+      (response.subscription || response).update(:success? => updated)
+    end
 
     # Returns all elements outputted by Chargify plus:
     # response.success? -> true if response code is 200, false otherwise
@@ -139,6 +170,13 @@ module Chargify
     
     def migrate_subscription(sub_id, product_id)
       raw_response = post("/subscriptions/#{sub_id}/migrations.json", :body => {:product_id => product_id })
+      success      = true if raw_response.code == 200
+      response     = Hashie::Mash.new(raw_response)
+      (response.subscription || response).update(:success? => success)
+    end
+
+    def migrate_subscription_by_handle(sub_id, product_handle)
+      raw_response = post("/subscriptions/#{sub_id}/migrations.json", :body => {:product_handle => product_handle })
       success      = true if raw_response.code == 200
       response     = Hashie::Mash.new(raw_response)
       (response.subscription || {}).update(:success? => success)
@@ -181,6 +219,10 @@ module Chargify
       statements = get("/subscriptions/#{sub_id}/statements.json", :query => options)
       statements.map{|t| Hashie::Mash.new t['statement']}
     end
+    
+    def subscription_statement(stmt_id)
+      Hashie::Mash.new( get("/statements/#{stmt_id}.json")).statement
+    end
 
     def site_transactions(options={})
       transactions = get("/transactions.json", :query => options)
@@ -212,6 +254,16 @@ module Chargify
       response[:success?] = response.code == 200
       Hashie::Mash.new(response)
     end 
+    
+    def list_product_families
+      families = get("/product_families.json")
+      families.map{|c| Hashie::Mash.new c['product_family']}
+    end
+    
+    def product_family_by_handle(handle)
+      response = get("/product_families/handle/#{handle}.json")
+      Hashie::Mash.new(response)
+    end
 
     alias update_metered_component  update_subscription_component_allocated_quantity
     alias update_component_quantity update_subscription_component_allocated_quantity

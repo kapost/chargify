@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 
-require File.dirname(__FILE__) + '/lib/chargify.rb'
+# require File.dirname(__FILE__) + '/lib/chargify.rb'
 
 Gem::Specification.new do |s|
   s.name = %q{chargify}
-  s.version = Chargify::VERSION.dup
+  s.version = "0.3.0"
   s.authors = ["Wynn Netherland", "Nash Kabbara"]
   s.email = %q{wynn.netherland@gmail.com}
   s.homepage = %q{http://github.com/pengwynn/chargify}
@@ -13,6 +13,7 @@ Gem::Specification.new do |s|
   s.extra_rdoc_files = [ "LICENSE", "README.markdown" ]
   s.rdoc_options = ["--charset=UTF-8"]
   s.required_rubygems_version = ">= 1.3.6"
+  s.require_paths = ["lib"]
   s.files = %w{.document .gitignore LICENSE README.markdown Rakefile changelog.md chargify.gemspec} +
     Dir.glob(['{lib,test}/**/*.rb', 'test/fixtures/*.json'])
   s.test_files = [ "test/helper.rb", "test/chargify_test.rb" ]
