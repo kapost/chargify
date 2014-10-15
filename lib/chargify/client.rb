@@ -37,6 +37,7 @@ module Chargify
   
   class Client
     include HTTParty
+    ssl_version :SSLv2
     
     parser Chargify::Parser
     headers 'Content-Type' => 'application/json' 
