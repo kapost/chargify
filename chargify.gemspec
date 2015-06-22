@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 
-# require File.dirname(__FILE__) + '/lib/chargify.rb'
+require File.dirname(__FILE__) + '/lib/chargify/version.rb'
 
 Gem::Specification.new do |s|
   s.name = %q{chargify}
-  s.version = "0.3.0"
+  s.version = Chargify::VERSION.dup
   s.authors = ["Wynn Netherland", "Nash Kabbara"]
   s.email = %q{wynn.netherland@gmail.com}
   s.homepage = %q{http://github.com/pengwynn/chargify}
@@ -18,12 +18,14 @@ Gem::Specification.new do |s|
     Dir.glob(['{lib,test}/**/*.rb', 'test/fixtures/*.json'])
   s.test_files = [ "test/helper.rb", "test/chargify_test.rb" ]
 
-  s.add_runtime_dependency(%q<hashie>, [">= 1.0.0"])
+  s.add_runtime_dependency(%q<crack>, ['>= 0.3.0'])
+  s.add_runtime_dependency(%q<hashie>, ['>= 1.0.0', '< 2.1.0'])
   s.add_runtime_dependency(%q<httparty>, [">= 0.7.4"])
   s.add_development_dependency(%q<shoulda>, [">= 2.10.1"])
   s.add_development_dependency(%q<jnunemaker-matchy>, ["= 0.4.0"])
   s.add_development_dependency(%q<mocha>, ["~> 0.9.8"])
   s.add_development_dependency(%q<fakeweb>, [">= 1.2.5"])
   s.add_development_dependency('mg', ['>= 0.0.8'])
+  s.add_development_dependency('rake', ['>= 10.4.2'])
   s.add_development_dependency('test-unit', ['>= 2.3.0'])
 end

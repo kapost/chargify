@@ -1,3 +1,5 @@
+require 'crack'
+
 module Chargify
   class << self
      attr_accessor :subdomain, :api_key, :shared_key, :site#, :format, :timeout, :shared_key
