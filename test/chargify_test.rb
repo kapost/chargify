@@ -1,4 +1,4 @@
-require 'test/helper'
+require 'helper'
 
 class ChargifyTest < Test::Unit::TestCase
   context "Chargify API client" do
@@ -53,7 +53,7 @@ class ChargifyTest < Test::Unit::TestCase
         :last_name    => "Netherland",
         :email        => "wynn@example.com"
       }
-      customer = @client.update_customer(info)
+      customer = @client.update_customer(info.delete(:id), info)
       customer.first_name.should == "Wynn"
     end
     

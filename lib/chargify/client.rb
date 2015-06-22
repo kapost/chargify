@@ -27,10 +27,12 @@ module Chargify
   
   class Parser < HTTParty::Parser
     def parse
+      return {} if body.strip.empty?
+
       begin
-        Crack::JSON.parse(body) || {}
-      rescue => e
-        raise UnexpectedResponseError, "Crack could not parse JSON. It said: #{e.message}. Chargify's raw response: #{body}"
+        ::JSON.parse(body) || {}
+      rescue JSON::ParserError => e
+        raise UnexpectedResponseError, "Could not parse JSON: #{e.message}. Chargify's raw response: #{body}"
       end
     end
   end
